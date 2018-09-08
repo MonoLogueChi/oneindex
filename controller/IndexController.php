@@ -1,4 +1,4 @@
-<?php 
+<?php
 class IndexController{
 	private $url_path;
 	private $name;
@@ -18,12 +18,15 @@ class IndexController{
 		$this->items = $this->items($this->path);
 	}
 
-	
+
 	function index(){
 		//是否404
 		$this->is404();
 
 		$this->is_password();
+
+		//是否需要允许跨域请求
+		$this->isAllowOrigin();
 
 		header("Expires:-1");
 		header("Cache-Control:no_cache");
@@ -43,7 +46,7 @@ class IndexController{
 		}else{
 			$this->items['.password']['path'] = get_absolute_path($this->path).'.password';
  		}
-		
+
 		$password = $this->get_content($this->items['.password']);
 		list($password) = explode("\n",$password);
 		$password = trim($password);
@@ -53,7 +56,7 @@ class IndexController{
 		}
 
 		$this->password($password);
-		
+
 	}
 
 	function password($password){
@@ -82,7 +85,7 @@ class IndexController{
 	}
 
 
-	
+
 	//文件夹
 	function dir(){
 		$root = get_absolute_path(dirname($_SERVER['SCRIPT_NAME'])).config('root_path');
@@ -133,7 +136,7 @@ class IndexController{
 		$http_type = ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')) ? 'https://' : 'http://';
 		$uri = onedrive::urlencode(get_absolute_path($this->url_path.'/'.$this->name));
 		$data['url'] = $http_type.$_SERVER['HTTP_HOST'].$root.$uri;
-		
+
 
 		$show = config('show');
 		foreach($show as $n=>$exts){
@@ -168,7 +171,7 @@ class IndexController{
 			if(is_array($items)){
 				$this->time = TIME;
 				cache('dir_'.$path, $items);
-			} 
+			}
 		}
 		return $items;
 	}
@@ -185,7 +188,7 @@ class IndexController{
 		if(!empty($this->name)){
 			$navs[$this->name] = end($navs).urlencode($this->name);
 		}
-		
+
 		return $navs;
 	}
 
@@ -210,10 +213,20 @@ class IndexController{
 		}
 
 		cache('404_'.$this->path.$this->name, true);
-		
+
 		http_response_code(404);
 		view::load('404')->show();
 		die();
+	}
+
+	//判断是否需要允许跨域请求
+	function isAllowOrigin(){
+		$origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+		if(in_array($origin, config(allow_origin))){
+			header('Access-Control-Allow-Origin:'.$origin);
+			header('Access-Control-Allow-Methods:GET, POST');
+			header('Access-Control-Allow-Headers:Origin, X-Requested-With, Content-Type, Accept');
+		}
 	}
 
 	function __destruct(){

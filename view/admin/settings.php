@@ -39,6 +39,11 @@
 		</div>
 
 		<div class="mdui-textfield">
+		  <h4>允许跨域请求</h4>
+		  <input class="mdui-textfield-input" type="text" name="allow_origin" value="<?php echo join(' ',$config['allow_origin']);?>"/>
+		</div>
+
+		<div class="mdui-textfield">
 		  <h4>去掉<code style="color: #c7254e;background-color: #f7f7f9;font-size:16px;">/?/</code> (需配合伪静态使用!!)</h4>
 		  <label class="mdui-textfield-label"></label>
 		  <label class="mdui-switch">
